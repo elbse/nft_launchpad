@@ -7,7 +7,7 @@ module nft_launchpad_addr::nft_launchpad {
     const COLLECTION_DESCRIPTION: vector<u8> = b"Collection Description";
     const COLLECTION_URI: vector<u8> = b"Collection Uri";
 
-    struct CollectionCreator has key {
+    struct CollectionCreator has key{
         extend_ref: ExtendRef
     }
 
@@ -23,11 +23,10 @@ module nft_launchpad_addr::nft_launchpad {
             extend_ref
         });
 
-        let creator_signer = &object::generate_signer_for_extending(&extend_ref);
+        let creator_signer = &object::generate_signer(creator_constructor_ref);
 
         aptos_token::create_collection(
             creator_signer,
-            deployer,
             string::utf8(COLLECTION_DESCRIPTION),
             1000,
             string::utf8(COLLECTION_NAME),
@@ -46,7 +45,7 @@ module nft_launchpad_addr::nft_launchpad {
         )
     }
 
-    public entry fun mint_token(minter: &signer){
+    public entry fun mint_token(minter: &signer) acquires CollectionCreator {
 
         let extend_ref = &borrow_global<CollectionCreator>(@nft_launchpad_addr).extend_ref;
         let creator_signer = &object::generate_signer_for_extending(extend_ref);
@@ -66,8 +65,8 @@ module nft_launchpad_addr::nft_launchpad {
     }
 
     #[test(deployer=@nft_launchpad_addr, minter=@0x123)]
-    fun test_function(deployer: signer, minter: signer){
+    fun test_function(deployer: signer, minter: signer) acquires CollectionCreator {
         init_module(&deployer);
-        // mint_token(&minter);
+        mint_token(&minter);
     }
 }
