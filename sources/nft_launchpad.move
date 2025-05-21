@@ -2,6 +2,7 @@ module nft_launchpad_addr::nft_launchpad {
     use aptos_token_objects::aptos_token;
     use std::string;
     use aptos_framework::object::{Self, ExtendRef};
+    use std::signer;
 
     const COLLECTION_NAME: vector<u8> = b"Collection Name";
     const COLLECTION_DESCRIPTION: vector<u8> = b"Collection Description";
@@ -51,7 +52,7 @@ module nft_launchpad_addr::nft_launchpad {
         let creator_signer = &object::generate_signer_for_extending(extend_ref);
 
 
-        aptos_token::mint_token_object(
+        let nft = aptos_token::mint_token_object(
             creator_signer,
             string::utf8(COLLECTION_NAME),
             string::utf8(COLLECTION_DESCRIPTION),
@@ -61,6 +62,10 @@ module nft_launchpad_addr::nft_launchpad {
             vector[],
             vector[],
         );
+
+        let minter_addr = signer::address_of(minter);
+
+        object::transfer(creator_signer, nft, minter_addr)
 
     }
 
